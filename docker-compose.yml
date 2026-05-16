@@ -1,0 +1,29 @@
+# MySQL 開発用コンテナ。.env はホスト側の Next / Prisma から読まれます。
+# ホストでアプリを動かす場合の DATABASE_URL 例（compose の root 既定と揃える）:
+#   mysql://root:root_password@127.0.0.1:3306/prisma_db_starter
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: prisma-db-starter-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-prisma_db_starter}
+      MYSQL_USER: ${MYSQL_USER:-app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-appsecret}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mysql_dev_data:
